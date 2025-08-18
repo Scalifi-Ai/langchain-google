@@ -778,8 +778,10 @@ def _response_to_result(
 
     for candidate in response.candidates:
         generation_info = {}
-        if candidate.finish_reason:
-            generation_info["finish_reason"] = candidate.finish_reason.name
+        # Normalize finish_reason for both enum-like and raw-int cases
+        if getattr(candidate, "finish_reason", None) is not None:
+            fr = candidate.finish_reason
+            generation_info["finish_reason"] = getattr(fr, "name", str(fr))
             # Add model_name in last chunk
             generation_info["model_name"] = response.model_version
         generation_info["safety_ratings"] = [
